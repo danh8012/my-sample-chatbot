@@ -1,0 +1,147 @@
+version: "3.1"
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - mood_great
+  - mood_unhappy
+  - bot_challenge
+  - weather
+  - salary
+  - buy_pizza
+  - inform
+  - stop
+  - buy_fancy_pizza
+
+entities:
+- employee_name
+- pizza_size
+- pizza_type
+
+slots:
+  employee_name:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: employee_name
+      intent: [salary]
+      not_intent: [greet,goodbye,affirm,deny,mood_great,mood_unhappy,bot_challenge,weather,buy_pizza,inform,stop,buy_fancy_pizza]
+      conditions:
+        - active_loop: find_salary_form
+          requested_slot: employee_name
+  pizza_size:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: pizza_size
+      intent: [buy_pizza,inform,stop,buy_fancy_pizza]
+      not_intent: [greet,goodbye,affirm,deny,mood_great,mood_unhappy,bot_challenge,weather,salary]
+      conditions:
+        - active_loop: simple_pizza_form
+          requested_slot: pizza_size
+        - active_loop: fancy_pizza_form
+          requested_slot: pizza_size
+  pizza_type:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: pizza_type
+      intent: [buy_pizza,inform,stop,buy_fancy_pizza]
+      not_intent: [greet,goodbye,affirm,deny,mood_great,mood_unhappy,bot_challenge,weather,salary]
+      conditions:
+        - active_loop: simple_pizza_form
+          requested_slot: pizza_type
+        - active_loop: fancy_pizza_form
+          requested_slot: pizza_type
+  vegetarian:
+    type: bool
+    influence_conversation: true
+    mappings:
+    - type: from_intent
+      value: true
+      intent: affirm
+    - type: from_intent
+      value: false
+      intent: deny
+
+responses:
+  utter_ask_employee_name:
+  - text: "Please provide your name."
+  utter_wait_for_finding_salary:
+  - text: "Please wait a moment."
+  utter_weather:
+  - text: "The weather is great today."
+  utter_greet:
+  - text: "Hey! How are you?"
+  utter_cheer_up:
+  - text: "Here is something to cheer you up:"
+    image: "https://i.imgur.com/nGF1K8f.jpg"
+  utter_did_that_help:
+  - text: "Did that help you?"
+  utter_happy:
+  - text: "Great, carry on!"
+  utter_goodbye:
+  - text: "Bye"
+  utter_iamabot:
+  - text: "I am a bot, powered by Rasa."
+  utter_submit:
+  - text: "I will now order a pizza for you!"
+  utter_pizza_slots:
+  - text: "I will order a {pizza_size} {pizza_type} pizza."
+  utter_ask_continue:
+  - text: "Are you sure you want to stop the form?"
+  utter_ask_pizza_size:
+  - text: "What size would you like your pizza to be?"
+  utter_ask_pizza_type:
+  - text: "What kind of pizza would you like to buy?"
+
+actions:
+- action_save_conversation
+- action_hello_world
+- action_find_salary_form
+- validate_find_salary_form
+- utter_ask_continue
+- utter_goodbye
+- utter_greet
+- utter_pizza_slots
+- utter_submit
+- validate_simple_pizza_form
+- validate_fancy_pizza_form
+- action_ask_pizza_type
+- action_ask_vegetarian
+
+forms:
+  find_salary_form:
+    ignored_intents:
+    - greet
+    - goodbye
+    - affirm
+    - deny
+    - mood_great
+    - mood_unhappy
+    - bot_challenge
+    - weather
+    - buy_pizza
+    - inform
+    - stop
+    - buy_fancy_pizza
+    required_slots:
+    - employee_name
+  simple_pizza_form:
+    required_slots:
+    - pizza_size
+    - pizza_type
+  fancy_pizza_form:
+    required_slots:
+    - vegetarian
+    - pizza_size
+    - pizza_type
